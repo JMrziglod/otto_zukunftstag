@@ -31,7 +31,7 @@ while True:
     ret, frame = cap.read()
 
     # Try to detect the pointer
-    print(detect_pointer(frame))
+    selected_cell = detect_pointer(frame)
 
     # draw a squared tic tac toe board in the center of the board:
     cell_size = frame.shape[0]//3
@@ -47,6 +47,14 @@ while True:
     cv2.line(frame, (left, int(frame.shape[0]//2-.5*cell_size)), (right, int(frame.shape[0]//2-.5*cell_size)), (0, 0, 255), 2)
     cv2.line(frame, (left, int(frame.shape[0]//2+.5*cell_size)), (right, int(frame.shape[0]//2+.5*cell_size)), (0, 0, 255), 2)
     cv2.line(frame, (left, int(frame.shape[0]//2+1.5*cell_size)), (right,  int(frame.shape[0]//2+1.5*cell_size)), (0, 0, 255), 2)
+
+    # Highlight the selected cell
+    if selected_cell[0] is not None:
+        top = int(frame.shape[0]//2-1.5*cell_size)
+        bottom = int(frame.shape[0]//2+1.5*cell_size)
+        left = int(frame.shape[1]//2-1.5*cell_size)
+        right = int(frame.shape[1]//2+1.5*cell_size)
+        cv2.rectangle(frame, (left+selected_cell[0][1]*cell_size, top+selected_cell[0][0]*cell_size), (left+(selected_cell[0][1]+1)*cell_size, top+(selected_cell[0][0]+1)*cell_size), (0, 255, 0), 2)
 
     # Display the frame
     cv2.imshow('Webcam', frame)
