@@ -2,10 +2,8 @@ import json
 import os
 from time import time
 
-
 import cv2
 import numpy as np
-from playsound import playsound
 
 import simpleaudio as sa
 
@@ -98,11 +96,11 @@ while True:
 
         cal_target = calibrate(frame, calibrating)
         draw_grid(frame, calibrating)
-        cv2.putText(frame, f"Calibrating: {calibrating}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(frame, f"Value: {cal_target}", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(frame, f"Press <W> for next", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(frame, f"Press <R> to reset", (10, 140), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(frame, f"Press <E> to load", (10, 170), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(frame, f"CALIBRATION MODE...", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+        cv2.putText(frame, f"Move your colored object to {calibrating}", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+        cv2.putText(frame, f"Press <W> for next field", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+        cv2.putText(frame, f"Press <R> to reset", (10, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+        cv2.putText(frame, f"Press <L> to load", (10, 170), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
         cv2.imshow('Tic Tac Toe', frame)
         c = cv2.waitKey(1) % 256
         if c == ord('q'):
@@ -122,7 +120,7 @@ while True:
                 "defaults": [[None, None, None], [None, None, None], [None, None, None]],
             }
             calibrating = [0, 0]
-        elif c == ord('e'):
+        elif c == ord('l'):
             calibration = load_calibration()
             calibrating = None
         continue
