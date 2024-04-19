@@ -5,26 +5,30 @@ import cv2
 import numpy as np
 import simpleaudio as sa
 
-
+RED = (0, 0, 255)
+FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 def get_cell(frame, row, col):
     """Return the frame conntent at the given row and column of the tic tac toe board."""
-    cell_size = frame.shape[0]//3
-    left = int(frame.shape[1]//2-1.5*cell_size)
-    right = int(frame.shape[1]//2+1.5*cell_size)
-    top = int(frame.shape[0]//2-1.5*cell_size)
-    return frame[top+row*cell_size:top+(row+1)*cell_size, left+col*cell_size:right+(col+1)*cell_size]
+    cs = frame.shape[0]//3
+    center = (frame.shape[1]//2, frame.shape[0]//2)
+    left = int(center[0]-1.5*cs)
+    right = int(center[0]+1.5*cs)
+    top = int(center[1]-1.5*cs)
+    return frame[top+row*cs:top+(row+1)*cs, left+col*cs:right+(col+1)*cs]
 
 class TicTacToe:
-    def __init__(self):
+    def __init__(self, n_rows=3, n_cols=3):
         # Create a 3x3 tic tac toe board, there are two players: 1 and 2
-        self.board = [[None, None, None], [None, None, None], [None, None, None]]
+        self.n_rows = n_rows
+        self.n_cols = n_cols
+        self.board = [[None] * n_cols] * n_rows
         self.last_selected_cell = None
         self.played_end_sound = False
         self.waiting_for_ai = False
         self.calibration = {
-            "targets": [[None, None, None], [None, None, None], [None, None, None]],
-            "defaults": [[None, None, None], [None, None, None], [None, None, None]],
+            "targets": [[None] * n_cols] * n_rows,
+            "defaults": [[None] * n_cols] * n_rows,
         }
         self.calibrating = [0, 0]
         self.start_time = time()
@@ -34,6 +38,11 @@ class TicTacToe:
         self.sound_draw = sa.WaveObject.from_wave_file("draw.wav")
 
     def update(self, frame, key):
+        if key == ord('r'):
+            self.reset()
+        if key == ord('c'):
+            self.calibrating = [0, 0]
+
         if self.calibrating is not None:
             self.calibration_mode(frame, key)
             return
@@ -44,19 +53,19 @@ class TicTacToe:
                 if not self.played_end_sound: 
                     self.sound_draw.play()
                     self.played_end_sound = True
-                cv2.putText(frame, "It's a draw!", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.putText(frame, "It's a draw!", (10, 50), FONT, 1, RED, 2)
             elif winner == 1:
                 if not self.played_end_sound: 
                     self.sound_lost.play()
                     self.played_end_sound = True
-                cv2.putText(frame, f"You lost!", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.putText(frame, f"You lost!", (10, 50), FONT, 1, RED, 2)
             elif winner == 2:
                 if not self.played_end_sound: 
                     self.sound_victory.play()
                     self.played_end_sound = True
-                cv2.putText(frame, f"You won!", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.putText(frame, "Press <Q> to quit", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.putText(frame, "Press <A> to play again", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.putText(frame, f"You won!", (10, 50), FONT, 1, RED, 2)
+            cv2.putText(frame, "Press <Q> to quit", (10, 80), FONT, 1, RED, 2)
+            cv2.putText(frame, "Press <A> to play again", (10, 110), FONT, 1, RED, 2)
 
             self.draw_board(frame)
 
@@ -81,20 +90,20 @@ class TicTacToe:
             elif time() - self.start_time > 3:
                 # countdown timer until we log in the move
                 self.board[row][col] = 2
-                self.start_time = time()
                 self.waiting_for_ai = True
                 self.sound_locked_in.play()
             else:
-                cv2.putText(frame, f"Locked in {3-int(time()-self.start_time)}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2)
+                cv2.putText(frame, f"Locked in {3-int(time()-self.start_time)}", (10, 50), FONT, 2, RED, 2)
         elif self.waiting_for_ai:
             ai_move = self.calculate_ai_move()
             if ai_move is not None:
                 row, col = ai_move
                 self.board[row][col] = 1
                 self.waiting_for_ai = False
-                start_time = time()
+                self.start_time = time()
 
     def reset(self):
+        """Reset the game state."""
         self.board = [[None, None, None], [None, None, None], [None, None, None]]
         self.last_selected_cell = None
         self.played_end_sound = False
@@ -102,6 +111,7 @@ class TicTacToe:
         self.start_time = time()
 
     def reset_calibration(self):
+        """Reset the calibration values."""
         self.calibration = {
             "targets": [[None, None, None], [None, None, None], [None, None, None]],
             "defaults": [[None, None, None], [None, None, None], [None, None, None]],
@@ -109,26 +119,27 @@ class TicTacToe:
         self.calibrating = [0, 0]
 
     def calibration_mode(self, frame, key):
+        """Calibrate the color values for the pointer detection."""
         if self.calibration["defaults"][0][0] is None:
-            for row in range(3):
-                for col in range(3):
+            for row in range(self.n_rows):
+                for col in range(self.n_cols):
                     self.calibration["defaults"][row][col] = get_cell(frame, row, col).mean(axis=(0,1)).astype(np.uint8).tolist()
 
         cell = get_cell(frame, *self.calibrating)
         cal_target = cell.mean(axis=(0,1)).astype(np.uint8).tolist()
         self.draw_board(frame, highlight=self.calibrating)
-        cv2.putText(frame, f"CALIBRATION MODE...", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
-        cv2.putText(frame, f"Move your colored object to {self.calibrating}", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
-        cv2.putText(frame, f"Press <W> for next field", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
-        cv2.putText(frame, f"Press <R> to reset", (10, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
-        cv2.putText(frame, f"Press <L> to load", (10, 170), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+        cv2.putText(frame, f"CALIBRATION MODE...", (10, 50), FONT, 0.8, RED, 2)
+        cv2.putText(frame, f"Move your colored object to {self.calibrating}", (10, 80), FONT, 0.8, RED, 2)
+        cv2.putText(frame, f"Press <W> for next field", (10, 110), FONT, 0.8, RED, 2)
+        cv2.putText(frame, f"Press <R> to reset", (10, 140), FONT, 0.8, RED, 2)
+        cv2.putText(frame, f"Press <L> to load", (10, 170), FONT, 0.8, RED, 2)
         
         if key == ord('w'):
             self.calibration["targets"][self.calibrating[0]][self.calibrating[1]] = cal_target
             self.calibrating[0] += 1
-            if self.calibrating[0] >= 3:
+            if self.calibrating[0] >= self.n_rows:
                 self.calibrating = [0, self.calibrating[1]+1]
-            if self.calibrating == [0, 3]:
+            if self.calibrating == [0, self.n_cols]:
                 # save calibration and enter game mode
                 self.save_calibration()
                 self.calibrating = None
@@ -140,35 +151,37 @@ class TicTacToe:
 
     def draw_board(self, frame, highlight=None):
         """Draw a grid on the frame."""
-        cell_size = frame.shape[0]//3
-        top = int(frame.shape[0]//2-1.5*cell_size)
-        left = int(frame.shape[1]//2-1.5*cell_size)
-        right = int(frame.shape[1]//2+1.5*cell_size)
+        cs = frame.shape[0]//3  # cell size
+        center = (frame.shape[1]//2, frame.shape[0]//2)
+        top = int(center[1]-1.5*cs)
+        left = int(center[0]-1.5*cs)
+        right = int(center[0]+1.5*cs)
         # draw vertical lines
-        cv2.line(frame, (int(frame.shape[1]//2-1.5*cell_size), 0), (int(frame.shape[1]//2-1.5*cell_size), frame.shape[0]), (0, 0, 255), 2)
-        cv2.line(frame, (int(frame.shape[1]//2-.5*cell_size), 0), (int(frame.shape[1]//2-.5*cell_size), frame.shape[0]), (0, 0, 255), 2)
-        cv2.line(frame, (int(frame.shape[1]//2+.5*cell_size), 0), (int(frame.shape[1]//2+.5*cell_size), frame.shape[0]), (0, 0, 255), 2)
-        cv2.line(frame, (int(frame.shape[1]//2+1.5*cell_size), 0), (int(frame.shape[1]//2+1.5*cell_size), frame.shape[0]), (0, 0, 255), 2)
+        cv2.line(frame, (int(center[0]-1.5*cs), 0), (int(center[0]-1.5*cs), frame.shape[0]), RED, 2)
+        cv2.line(frame, (int(center[0]-.5*cs), 0), (int(center[0]-.5*cs), frame.shape[0]), RED, 2)
+        cv2.line(frame, (int(center[0]+.5*cs), 0), (int(center[0]+.5*cs), frame.shape[0]), RED, 2)
+        cv2.line(frame, (int(center[0]+1.5*cs), 0), (int(center[0]+1.5*cs), frame.shape[0]), RED, 2)
         # draw horizontal lines
-        cv2.line(frame, (left, int(frame.shape[0]//2-1.5*cell_size)), (right,  int(frame.shape[0]//2-1.5*cell_size)), (0, 0, 255), 2)
-        cv2.line(frame, (left, int(frame.shape[0]//2-.5*cell_size)), (right, int(frame.shape[0]//2-.5*cell_size)), (0, 0, 255), 2)
-        cv2.line(frame, (left, int(frame.shape[0]//2+.5*cell_size)), (right, int(frame.shape[0]//2+.5*cell_size)), (0, 0, 255), 2)
-        cv2.line(frame, (left, int(frame.shape[0]//2+1.5*cell_size)), (right,  int(frame.shape[0]//2+1.5*cell_size)), (0, 0, 255), 2)
+        cv2.line(frame, (left, int(center[1]-1.5*cs)), (right,  int(center[1]-1.5*cs)), RED, 2)
+        cv2.line(frame, (left, int(center[1]-.5*cs)), (right, int(center[1]-.5*cs)), RED, 2)
+        cv2.line(frame, (left, int(center[1]+.5*cs)), (right, int(center[1]+.5*cs)), RED, 2)
+        cv2.line(frame, (left, int(center[1]+1.5*cs)), (right,  int(center[1]+1.5*cs)), RED, 2)
 
-        for row in range(3):
-            for col in range(3):
+        for row in range(self.n_rows):
+            for col in range(self.n_cols):
                 if self.board[row][col] == 1:
-                    cv2.circle(frame, (int(frame.shape[1]//2-1.5*cell_size+cell_size//2+col*cell_size), int(frame.shape[0]//2-1.5*cell_size+cell_size//2+row*cell_size)), cell_size//3, (0, 0, 255), 2)
+                    cv2.circle(frame, (int(center[0]-1.5*cs+cs//2+col*cs), int(center[1]-1.5*cs+cs//2+row*cs)), cs//3, RED, 2)
                 elif self.board[row][col] == 2:
-                    cv2.line(frame, (int(frame.shape[1]//2-1.5*cell_size+col*cell_size+cell_size//4), int(frame.shape[0]//2-1.5*cell_size+row*cell_size+cell_size//4)), (int(frame.shape[1]//2-1.5*cell_size+col*cell_size+3*cell_size//4), int(frame.shape[0]//2-1.5*cell_size+row*cell_size+3*cell_size//4)), (0, 0, 255), 2)
-                    cv2.line(frame, (int(frame.shape[1]//2-1.5*cell_size+col*cell_size+cell_size//4), int(frame.shape[0]//2-1.5*cell_size+row*cell_size+3*cell_size//4)), (int(frame.shape[1]//2-1.5*cell_size+col*cell_size+3*cell_size//4), int(frame.shape[0]//2-1.5*cell_size+row*cell_size+cell_size//4)), (0, 0, 255), 2)
+                    cv2.line(frame, (int(center[0]-1.5*cs+col*cs+cs//4), int(center[1]-1.5*cs+row*cs+cs//4)), (int(center[0]-1.5*cs+col*cs+3*cs//4), int(center[1]-1.5*cs+row*cs+3*cs//4)), RED, 2)
+                    cv2.line(frame, (int(center[0]-1.5*cs+col*cs+cs//4), int(center[1]-1.5*cs+row*cs+3*cs//4)), (int(center[0]-1.5*cs+col*cs+3*cs//4), int(center[1]-1.5*cs+row*cs+cs//4)), RED, 2)
 
         if highlight is not None:
-            cv2.rectangle(frame, (left+highlight[1]*cell_size, top+highlight[0]*cell_size), (left+(highlight[1]+1)*cell_size, top+(highlight[0]+1)*cell_size), (0, 255, 0), 2)
+            cv2.rectangle(frame, (left+highlight[1]*cs, top+highlight[0]*cs), (left+(highlight[1]+1)*cs, top+(highlight[0]+1)*cs), (0, 255, 0), 2)
 
     def detect_pointer(self, frame):
         """Detect a red area in the frame and return the row and column of the cell with the most red pixels."""
         best_cell = (None, 15)
+        center = (frame.shape[1]//2, frame.shape[0]//2)
 
         original_frame = frame.copy()
 
@@ -177,7 +190,7 @@ class TicTacToe:
                 cell = get_cell(original_frame, row, col)
                 target_error = (np.abs(cell.mean(axis=(0,1))-np.array(self.calibration["targets"][row][col])).mean())
                 default_error = (np.abs(cell.mean(axis=(0,1))-np.array(self.calibration["defaults"][row][col])).mean())
-                cv2.putText(frame, f"{target_error:.2f}, {default_error:.2f}", (int(frame.shape[1]//2-1.5*frame.shape[0]//3+col*frame.shape[0]//3+frame.shape[0]//6), int(frame.shape[0]//2-1.5*frame.shape[0]//3+row*frame.shape[0]//3)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (150, 150, 150), 2)
+                cv2.putText(frame, f"{target_error:.2f}, {default_error:.2f}", (int(center[0]-1.5*frame.shape[0]//3+col*frame.shape[0]//3+frame.shape[0]//6), int(center[1]-1.5*frame.shape[0]//3+row*frame.shape[0]//3)), FONT, 0.8, (150, 150, 150), 2)
                 if target_error < default_error and target_error < best_cell[1]:
                     best_cell = (row, col), target_error
 
