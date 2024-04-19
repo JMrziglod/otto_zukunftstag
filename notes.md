@@ -1,7 +1,8 @@
 # Ideen
 
 - [ ] Raylib Examples
-    - [ ] Ein Fenster erstellen -> John
+    - [x] Ein Fenster erstellen -> John
+    - [x] Einen Text darstellen
         - [ ] Was ist eine Main Loop (while-Schleife)?
     - [ ] Ein Rechteck zeichnen -> John
     - [ ] Ein Kreis zeichnen und mit Punkten ausfüllen -> Benny
@@ -9,7 +10,6 @@
     - [ ] Das Rechteck mit der Tastatur bewegen
     - [ ] Das Rechteck mit der Maus bewegen
     - [ ] Ein Bild laden und anzeigen
-    - [ ] Einen Text darstellen
     - [ ] Ein Sound abspielen
 - [ ] Spiele-Ideen:
     - Pong
