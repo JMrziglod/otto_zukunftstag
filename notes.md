@@ -1,9 +1,11 @@
 # Ideen
 
 - [ ] Raylib Examples
-    - [x] Was ist eine Main Loop (while-Schleife)?
-    - [x] Ein Fenster erstellen -> John
-    - [x] Einen Text darstellen -> John
+    - [x] Wie funktioniert eine App?
+    - [x] Drawing: Male einen Text
+    - [x] Input: Tastatur
+    - [x] Input: Maus
+    - [ ] Update: Aktualisiere den Zustand
     - [ ] Ein Rechteck zeichnen -> John
     - [x] Ein Kreis zeichnen und mit Punkten ausfüllen -> Benny
     - [ ] Tastatur Eingaben abfangen (und etwas printen) 

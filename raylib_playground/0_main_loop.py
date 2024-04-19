@@ -23,3 +23,11 @@ for i in range(3):
 # Du kannst Befehle damit so lange wiederholen wie eine Bedingung erfüllt ist:
 while True:
     print("Unendlich mal hallo!") # Vorsicht! Das wird unendlich oft mal ausgeführt!
+
+
+# Alle Apps oder Videospiele basieren auf einer While-Schleife, die so lange läuft,
+# bis der Benutzer das Programm schließt.
+# Drei Aufgaben werden in dieser While-Schleife erledigt:
+# 1. MALE etwas auf den Bildschirm, z.B. ein Bild der Spielerfigur oder ein Text.
+# 2. EINGABEN des Benutzers überprüfen, z.B. wurde eine Taste gedrückt oder die Maus bewegt?
+# 3. AKTUALISIERE den Zustand des Programms, z.B. ändert sich die Position des Spielers?

@@ -49,7 +49,7 @@ def main():
         draw_circle_by_function(300, 300, 100, VIOLET)
         draw_text("Option 2: Wir zeichnen den Kreis über Punkte", 0, 500, 20, VIOLET)
         steps_min = 4.0
-        steps_max = 20.0
+        steps_max = 200.0
         gui_slider(Rectangle(0, 550, 100, 10), "Wähle die Anzahl der Punkte", "Punkte", steps_value, steps_min, steps_max)
         draw_circle_by_points(300, 700, 100, int(steps_value[0]), VIOLET)
         end_drawing()
