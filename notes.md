@@ -1,11 +1,11 @@
 # Ideen
 
 - [ ] Raylib Examples
+    - [x] Was ist eine Main Loop (while-Schleife)?
     - [x] Ein Fenster erstellen -> John
-    - [x] Einen Text darstellen
-        - [ ] Was ist eine Main Loop (while-Schleife)?
+    - [x] Einen Text darstellen -> John
     - [ ] Ein Rechteck zeichnen -> John
-    - [ ] Ein Kreis zeichnen und mit Punkten ausfüllen -> Benny
+    - [x] Ein Kreis zeichnen und mit Punkten ausfüllen -> Benny
     - [ ] Tastatur Eingaben abfangen (und etwas printen) 
     - [ ] Das Rechteck mit der Tastatur bewegen
     - [ ] Das Rechteck mit der Maus bewegen
