@@ -9,7 +9,7 @@
 # den Zustand des Programms auf den Bildschirm malen.
 # 
 # Unten siehst du ein Beispiel für eine ganz einfache App,
-# die einfach nur ein Fenster öffnet und "Hallo!" darauf schreibt.
+# die nur ein schwarzes Fenster öffnet und "Hallo!" darauf schreibt.
 
 import pyray as ry
 
