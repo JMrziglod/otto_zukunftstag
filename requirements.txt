@@ -4,3 +4,6 @@ simpleaudio
 raylib
 streamlit
 matplotlib
+webcolors
+openai
+streamlit_drawable_canvas
